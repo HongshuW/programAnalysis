@@ -1,0 +1,15 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>programanalysis</groupId>
+  <artifactId>program-analysis</artifactId>
+  <version>1</version>
+
+  <dependencies>
+  <dependency>
+    <groupId>org.soot-oss</groupId>
+    <artifactId>soot</artifactId>
+    <version>4.5.0</version>
+  </dependency>
+  </dependencies>
+  
+</project>
