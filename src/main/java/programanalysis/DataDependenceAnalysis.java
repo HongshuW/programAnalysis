@@ -12,8 +12,6 @@ import soot.options.Options;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.SimpleLocalDefs;
-import soot.toolkits.scalar.SimpleLocalUses;
-
 import java.util.Collections;
 
 public class DataDependenceAnalysis {
@@ -31,10 +29,11 @@ public class DataDependenceAnalysis {
         // Specify the method to analyze
         String targetMethodSignature = "void test(java.lang.String[],java.lang.String[],com.google.javascript.jscomp.DiagnosticType)";
         SootMethod targetMethod = findMethodBySignature(targetClass, targetMethodSignature);
+        String targetVariableName = "r9";
 
         if (targetMethod != null && targetMethod.isConcrete()) {
             System.out.println("Analyzing method: " + targetMethod.getName());
-            performDataDependenceAnalysis(targetMethod);
+            analyzeVariableDependencies(targetMethod, targetVariableName);
         } else {
             System.out.println("Method not found or is not concrete: " + targetMethodSignature);
         }
@@ -50,7 +49,7 @@ public class DataDependenceAnalysis {
         return null; // Return null if the method is not found
     }
 
-    public static void performDataDependenceAnalysis(SootMethod method) {
+    public static void analyzeVariableDependencies(SootMethod method, String variableName) {
         // Retrieve the active body of the method
         Body body = method.retrieveActiveBody();
 
@@ -59,21 +58,24 @@ public class DataDependenceAnalysis {
 
         // Perform reaching definitions analysis
         SimpleLocalDefs defs = new SimpleLocalDefs(cfg);
-        SimpleLocalUses uses = new SimpleLocalUses(cfg, defs);
 
+        // Iterate through the statements in the method
         for (Unit unit : body.getUnits()) {
             if (unit instanceof Stmt) {
                 Stmt stmt = (Stmt) unit;
 
-                // Identify statements using variables
+                // Check if the statement uses the specified variable
                 for (ValueBox useBox : stmt.getUseBoxes()) {
                     if (useBox.getValue() instanceof Local) {
                         Local local = (Local) useBox.getValue();
-                        System.out.println("Variable: " + local);
 
-                        // Find all definitions reaching this use
-                        for (Unit defUnit : defs.getDefsOfAt(local, stmt)) {
-                            System.out.println("Definition: " + defUnit + " -> Use: " + stmt);
+                        if (local.getName().equals(variableName)) {
+                            System.out.println("Found use of variable: " + variableName + " in statement: " + stmt);
+
+                            // Find definitions reaching this use
+                            for (Unit defUnit : defs.getDefsOfAt(local, stmt)) {
+                                System.out.println("Definition: " + defUnit + " -> Use: " + stmt);
+                            }
                         }
                     }
                 }
