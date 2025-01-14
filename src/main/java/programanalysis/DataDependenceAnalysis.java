@@ -20,13 +20,12 @@ public class DataDependenceAnalysis {
     public static void main(String[] args) {
         G.reset();
 
-        // Configure Soot
+        /* Configure Soot */
         Options.v().set_keep_line_number(true);
         Options.v().set_prepend_classpath(true);
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_output_format(Options.output_format_none);
-
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
 
@@ -46,13 +45,7 @@ public class DataDependenceAnalysis {
         Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\programAnalysis\\target\\classes"));
         Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\programAnalysis\\target;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
 
-        // Load the target class
-        SootClass targetClass = Scene.v().loadClassAndSupport("programanalysis.ExampleProgram");
         Scene.v().loadNecessaryClasses();
-
-        // Specify the method to analyze
-        SootMethod targetMethod = targetClass.getMethodByName("main");
-
 
         /* Configure Spark */
         Map<String,String> sparkOptions = new HashMap<>();
@@ -65,6 +58,11 @@ public class DataDependenceAnalysis {
         /* Points-to Analysis */
         PackManager.v().runPacks();
         PointsToAnalysis pa = Scene.v().getPointsToAnalysis();
+
+        // Load the target class
+        SootClass targetClass = Scene.v().loadClassAndSupport("programanalysis.ExampleProgram");
+        // Specify the method to analyze
+        SootMethod targetMethod = targetClass.getMethodByName("main");
 
         Body body = targetMethod.retrieveActiveBody();
         for (Local local : body.getLocals()) {
