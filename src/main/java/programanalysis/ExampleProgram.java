@@ -5,10 +5,6 @@ public class ExampleProgram {
         A a = new A();
         B b = new B();
         A aliasOfA = a;
-        if ("s".length() == 1) {
-            A x = aliasOfA;
-            x.foo();
-        }
 
         a.foo();
         aliasOfA.foo();

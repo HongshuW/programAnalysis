@@ -34,14 +34,6 @@ public class DataDependenceAnalysis {
         // Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\Closure1Bug\\build\\test"));
         // Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\Closure1Bug\\build;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
 
-        // // Load the target class
-        // SootClass targetClass = Scene.v().loadClassAndSupport("com.google.javascript.jscomp.CommandLineRunnerTest");
-        // Scene.v().loadNecessaryClasses();
-
-        // // Specify the method to analyze
-        // String targetMethodSignature = "void test(java.lang.String[],java.lang.String[],com.google.javascript.jscomp.DiagnosticType)";
-        // SootMethod targetMethod = findMethodBySignature(targetClass, targetMethodSignature);
-
         Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\programAnalysis\\target\\classes"));
         Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\programAnalysis\\target;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
 
@@ -58,6 +50,13 @@ public class DataDependenceAnalysis {
         /* Points-to Analysis */
         PackManager.v().runPacks();
         PointsToAnalysis pa = Scene.v().getPointsToAnalysis();
+
+        // // Load the target class
+        // SootClass targetClass = Scene.v().loadClassAndSupport("com.google.javascript.jscomp.CommandLineRunnerTest");
+
+        // // Specify the method to analyze
+        // String targetMethodSignature = "void test(java.lang.String[],java.lang.String[],com.google.javascript.jscomp.DiagnosticType)";
+        // SootMethod targetMethod = findMethodBySignature(targetClass, targetMethodSignature);
 
         // Load the target class
         SootClass targetClass = Scene.v().loadClassAndSupport("programanalysis.ExampleProgram");
