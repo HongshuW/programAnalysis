@@ -1,10 +1,18 @@
 package programanalysis;
 
-import soot.*;
+import soot.Body;
+import soot.Local;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Unit;
+import soot.ValueBox;
 import soot.jimple.Stmt;
 import soot.options.Options;
-import soot.toolkits.graph.*;
-import soot.toolkits.scalar.*;
+import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.scalar.SimpleLocalDefs;
+import soot.toolkits.scalar.SimpleLocalUses;
 
 import java.util.Collections;
 
@@ -54,7 +62,7 @@ public class DataDependenceAnalysis {
         SimpleLocalUses uses = new SimpleLocalUses(cfg, defs);
 
         for (Unit unit : body.getUnits()) {
-            if (unit instanceof soot.jimple.Stmt) {
+            if (unit instanceof Stmt) {
                 Stmt stmt = (Stmt) unit;
 
                 // Identify statements using variables
