@@ -9,9 +9,12 @@ import soot.PointsToSet;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.jimple.spark.SparkTransformer;
 import soot.options.Options;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DataDependenceAnalysis {
     public static void main(String[] args) {
@@ -25,9 +28,9 @@ public class DataDependenceAnalysis {
         Options.v().set_output_format(Options.output_format_none);
 
         Options.v().setPhaseOption("jb", "use-original-names:true");
-        Options.v().setPhaseOption("cg.spark", "on");
-        Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("cg.spark", "pta:spark");
+
+
+        /* Load class */
 
         // Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\Closure1Bug\\build\\test"));
         // Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\Closure1Bug\\build;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
@@ -50,10 +53,19 @@ public class DataDependenceAnalysis {
         // Specify the method to analyze
         SootMethod targetMethod = targetClass.getMethodByName("main");
 
+
+        /* Configure Spark */
+        Map<String,String> sparkOptions = new HashMap<>();
+        sparkOptions.put("enabled", "true");
+        sparkOptions.put("verbose", "true");
+        sparkOptions.put("vta", "true");
+        sparkOptions.put("pta", "spark");
+        SparkTransformer.v().transform("", sparkOptions);
+
+        /* Points-to Analysis */
         PackManager.v().runPacks();
         PointsToAnalysis pa = Scene.v().getPointsToAnalysis();
 
-        // We can iterate over the Jimple body to find locals named 'a', 'aliasOfA', etc.
         Body body = targetMethod.retrieveActiveBody();
         for (Local local : body.getLocals()) {
             PointsToSet pts = pa.reachingObjects(local);
