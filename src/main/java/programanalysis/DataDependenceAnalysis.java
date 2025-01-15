@@ -9,6 +9,9 @@ import soot.PointsToSet;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Unit;
+import soot.ValueBox;
+import soot.jimple.Stmt;
 import soot.jimple.spark.SparkTransformer;
 import soot.options.Options;
 
@@ -82,14 +85,39 @@ public class DataDependenceAnalysis {
         SootMethod targetMethod = targetClass.getMethodByName("main");
 
         Body body = targetMethod.retrieveActiveBody();
-        for (Local local : body.getLocals()) {
-            PointsToSet pts = pa.reachingObjects(local);
-            if (pts.isEmpty()) {
-                System.out.println("PointsToSet is empty for variable: " + local.getName());
-            } else {
-                System.out.println("PointsToSet for " + local.getName() + ": " + pts.possibleTypes());
+        Local targetLocal = findLocalVariable(body, "aliasOfA");
+
+        for (Unit unit : body.getUnits()) {
+            if (unit instanceof Stmt) {
+                Stmt stmt = (Stmt) unit;
+
+                // Check if the statement uses the specified variable or an alias
+                for (ValueBox useBox : stmt.getUseBoxes()) {
+                    if (useBox.getValue() instanceof Local) {
+                        Local usedLocal = (Local) useBox.getValue();
+
+                        // Check aliasing
+                        if (aliases(targetLocal, usedLocal, pa)) {
+                            System.out.println(usedLocal + " in " + stmt);
+
+                            // // Find definitions reaching this use
+                            // for (Unit defUnit : defs.getDefsOfAt(usedLocal, stmt)) {
+                            //     System.out.println("Definition: " + defUnit + " -> Use: " + stmt);
+                            // }
+                        }
+                    }
+                }
             }
         }
+
+        // for (Local local : body.getLocals()) {
+        //     PointsToSet pts = pa.reachingObjects(local);
+        //     if (pts.isEmpty()) {
+        //         System.out.println("PointsToSet is empty for variable: " + local.getName());
+        //     } else {
+        //         System.out.println("PointsToSet for " + local.getName() + ": " + pts.possibleTypes());
+        //     }
+        // }
     }
 
     public static SootMethod findMethodBySignature(SootClass sootClass, String methodSignature) {
@@ -100,6 +128,26 @@ public class DataDependenceAnalysis {
             }
         }
         return null; // Return null if the method is not found
+    }
+
+    public static Local findLocalVariable(Body body, String sourceVariableName) {
+        for (Local local : body.getLocals()) {
+            if (local.getName().equals(sourceVariableName)) {
+                return local;
+            }
+        }
+        return null;
+    }
+
+    public static boolean aliases(Local targetLocal, Local usedLocal, PointsToAnalysis pointsToAnalysis) {
+        if (targetLocal.equals(usedLocal)) {
+            // Same variable: trivially aliases itself
+            return true;
+        }
+        PointsToSet targetPointsToSet = pointsToAnalysis.reachingObjects(targetLocal);
+        PointsToSet usedPointsToSet = pointsToAnalysis.reachingObjects(usedLocal);
+        // Check if the two points-to sets have a non-empty intersection
+        return targetPointsToSet.hasNonEmptyIntersection(usedPointsToSet);
     }
 
 }

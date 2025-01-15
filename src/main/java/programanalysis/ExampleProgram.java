@@ -8,9 +8,11 @@ public class ExampleProgram {
         if ("string".length() == 1) {
             aliasOfA = a;
         }
+        A a2 = new A();
 
         a.foo();
         aliasOfA.foo();
+        a2.foo();
         b.bar();
     }
 }
