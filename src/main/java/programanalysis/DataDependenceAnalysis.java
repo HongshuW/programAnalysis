@@ -1,6 +1,7 @@
 package programanalysis;
 
 import soot.Body;
+import soot.EntryPoints;
 import soot.G;
 import soot.Local;
 import soot.PackManager;
@@ -20,12 +21,10 @@ import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
 import soot.toolkits.scalar.Pair;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,10 +73,7 @@ public class DataDependenceAnalysis {
         SparkTransformer.v().transform("", sparkOptions);
 
         /* Set entry point */
-        List<SootMethod> entryPoints = new ArrayList<>();
-        // entryPoints.add(Scene.v().getMethod("<programanalysis.ExampleProgram: void main(java.lang.String[])>"));
-        entryPoints.add(Scene.v().getMethod("<com.google.javascript.jscomp.CommandLineRunnerTest: void testSimpleModeLeavesUnusedParams()>"));
-        Scene.v().setEntryPoints(entryPoints);
+        Scene.v().setEntryPoints(EntryPoints.v().all());
 
         /* Points-to Analysis */
         PackManager.v().runPacks();
@@ -166,12 +162,6 @@ public class DataDependenceAnalysis {
 
         // Traverse the call graph
         CallGraph cg = Scene.v().getCallGraph();
-        
-        for (Edge edge : cg) {
-            System.out.println(edge.src() + " -> " + edge.tgt());
-        }
-
-
         Iterator<Edge> edges = cg.edgesInto(method);
 
         while (edges.hasNext()) {
