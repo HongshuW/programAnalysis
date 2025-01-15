@@ -26,7 +26,9 @@ public class DataDependenceAnalysis {
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_output_format(Options.output_format_none);
+        Options.v().setPhaseOption("cg.spark", "on");
         Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb", "verbose:true");
 
 
         /* Load class */
@@ -43,8 +45,17 @@ public class DataDependenceAnalysis {
         Map<String,String> sparkOptions = new HashMap<>();
         sparkOptions.put("enabled", "true");
         sparkOptions.put("verbose", "true");
-        sparkOptions.put("vta", "true");
-        sparkOptions.put("pta", "spark");
+        sparkOptions.put("propagator", "worklist");
+        sparkOptions.put("simple-edges-bidirectional", "false");
+        sparkOptions.put("on-fly-cg", "true");
+        sparkOptions.put("set-impl", "double");
+        sparkOptions.put("double-set-old", "hybrid");
+        sparkOptions.put("double-set-new", "hybrid");
+        sparkOptions.put("context", "true");
+        sparkOptions.put("field-based", "true");
+        sparkOptions.put("types-for-sites", "true");
+        sparkOptions.put("merge-stringbuffer", "true");
+        sparkOptions.put("string-constants", "true");
         SparkTransformer.v().transform("", sparkOptions);
 
         /* Points-to Analysis */
@@ -66,8 +77,11 @@ public class DataDependenceAnalysis {
         Body body = targetMethod.retrieveActiveBody();
         for (Local local : body.getLocals()) {
             PointsToSet pts = pa.reachingObjects(local);
-            System.out.println("Local Variable: " + local.getName() + 
-                            " | PointsToSet: " + pts);
+            if (pts.isEmpty()) {
+                System.out.println("PointsToSet is empty for variable: " + local.getName());
+            } else {
+                System.out.println("PointsToSet for " + local.getName() + ": " + pts.possibleTypes());
+            }
         }
     }
 

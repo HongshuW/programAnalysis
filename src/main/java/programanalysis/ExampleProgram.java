@@ -4,7 +4,10 @@ public class ExampleProgram {
     public static void main(String[] args) {
         A a = new A();
         B b = new B();
-        A aliasOfA = a;
+        A aliasOfA = new A();
+        if ("string".length() == 1) {
+            aliasOfA = a;
+        }
 
         a.foo();
         aliasOfA.foo();
