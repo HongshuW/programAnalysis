@@ -12,8 +12,10 @@ import soot.SootMethod;
 import soot.jimple.spark.SparkTransformer;
 import soot.options.Options;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DataDependenceAnalysis {
@@ -57,6 +59,11 @@ public class DataDependenceAnalysis {
         sparkOptions.put("merge-stringbuffer", "true");
         sparkOptions.put("string-constants", "true");
         SparkTransformer.v().transform("", sparkOptions);
+
+        /* Set entry point */
+        List<SootMethod> entryPoints = new ArrayList<>();
+        entryPoints.add(Scene.v().getMethod("<programanalysis.ExampleProgram: void main(java.lang.String[])>"));
+        Scene.v().setEntryPoints(entryPoints);
 
         /* Points-to Analysis */
         PackManager.v().runPacks();
