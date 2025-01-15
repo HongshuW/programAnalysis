@@ -4,16 +4,20 @@ public class ExampleProgram {
     public static void main(String[] args) {
         A a = new A();
         B b = new B();
-        A aliasOfA = new A();
+        A aliasOfA = createA();
         if ("string".length() == 1) {
             aliasOfA = a;
         }
-        A a2 = new A();
+        A a2 = createA();
 
         a.foo();
         aliasOfA.foo();
         a2.foo();
         b.bar();
+    }
+
+    public static A createA() {
+        return new A();
     }
 }
 
