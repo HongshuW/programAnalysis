@@ -77,6 +77,7 @@ public class DataDependenceAnalysis {
 
         /* Points-to Analysis */
         PackManager.v().runPacks();
+        CallGraph cg = Scene.v().getCallGraph();
         PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
 
         /* Load class and method */
@@ -116,7 +117,7 @@ public class DataDependenceAnalysis {
             }
         }
 
-        Set<Local> aliases = findInterProceduralAliases(targetMethod, targetLocal, pta);
+        Set<Local> aliases = findInterProceduralAliases(targetMethod, targetLocal, pta, cg);
         System.out.println("Inter-procedural aliases: " + aliases);
 
     }
@@ -151,7 +152,7 @@ public class DataDependenceAnalysis {
         return targetPointsToSet.hasNonEmptyIntersection(usedPointsToSet);
     }
 
-    private static Set<Local> findInterProceduralAliases(SootMethod method, Local variable, PointsToAnalysis pta) {
+    private static Set<Local> findInterProceduralAliases(SootMethod method, Local variable, PointsToAnalysis pta, CallGraph cg) {
         Set<Local> aliases = new HashSet<>();
 
         // Get points-to set for the variable
@@ -161,7 +162,6 @@ public class DataDependenceAnalysis {
         }
 
         // Traverse the call graph
-        CallGraph cg = Scene.v().getCallGraph();
         Iterator<Edge> edges = cg.edgesInto(method);
 
         while (edges.hasNext()) {
