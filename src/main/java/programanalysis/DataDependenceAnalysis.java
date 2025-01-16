@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import programanalysis.sootconfig.ClosureSootConfig;
+import programanalysis.sootconfig.ExampleProgramSootConfig;
 import programanalysis.sootconfig.SootConfiguration;
 
 public class DataDependenceAnalysis {
@@ -45,7 +46,8 @@ public class DataDependenceAnalysis {
         Options.v().setPhaseOption("jb", "use-original-names:true");
         Options.v().setPhaseOption("jb", "verbose:true");
 
-        SootConfiguration sootConfig = new ClosureSootConfig();
+        // SootConfiguration sootConfig = new ClosureSootConfig();
+        SootConfiguration sootConfig = new ExampleProgramSootConfig();
 
         /* Load class */
         sootConfig.setClassPath();
@@ -110,7 +112,6 @@ public class DataDependenceAnalysis {
 
     public static boolean aliases(Local targetLocal, Local usedLocal, PointsToAnalysis pointsToAnalysis) {
         if (targetLocal.equals(usedLocal)) {
-            // Same variable: trivially aliases itself
             return true;
         }
         PointsToSet targetPointsToSet = pointsToAnalysis.reachingObjects(targetLocal);
