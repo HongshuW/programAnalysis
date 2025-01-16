@@ -8,7 +8,6 @@ import soot.PackManager;
 import soot.PointsToAnalysis;
 import soot.PointsToSet;
 import soot.Scene;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -21,12 +20,14 @@ import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
 import soot.toolkits.scalar.Pair;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import programanalysis.sootconfig.ClosureSootConfig;
+import programanalysis.sootconfig.SootConfiguration;
 
 public class DataDependenceAnalysis {
     public static void main(String[] args) {
@@ -44,14 +45,10 @@ public class DataDependenceAnalysis {
         Options.v().setPhaseOption("jb", "use-original-names:true");
         Options.v().setPhaseOption("jb", "verbose:true");
 
+        SootConfiguration sootConfig = new ClosureSootConfig();
 
         /* Load class */
-
-        Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\Closure1Bug\\build\\test"));
-        Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\Closure1Bug\\build;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
-
-        // Options.v().set_process_dir(Collections.singletonList("C:\\Users\\admin\\cophi\\programAnalysis\\target\\classes"));
-        // Options.v().set_soot_classpath("C:\\Users\\admin\\cophi\\programAnalysis\\target;C:\\Program Files\\Java\\jdk1.8.0_202\\jre\\lib\\rt.jar");
+        sootConfig.setClassPath();
 
         Scene.v().loadNecessaryClasses();
 
@@ -80,24 +77,13 @@ public class DataDependenceAnalysis {
         CallGraph cg = Scene.v().getCallGraph();
         PointsToAnalysis pta = Scene.v().getPointsToAnalysis();
 
-        /* Load class and method */
-
-        // Load the target class
-        SootClass targetClass = Scene.v().loadClassAndSupport("com.google.javascript.jscomp.CommandLineRunnerTest");
-        // Specify the method to analyze
-        String targetMethodSignature = "void test(java.lang.String[],java.lang.String[],com.google.javascript.jscomp.DiagnosticType)";
-        SootMethod targetMethod = findMethodBySignature(targetClass, targetMethodSignature);
-
-        // // Load the target class
-        // SootClass targetClass = Scene.v().loadClassAndSupport("programanalysis.ExampleProgram");
-        // // Specify the method to analyze
-        // SootMethod targetMethod = targetClass.getMethodByName("main");
+        /* Load target method */
+        SootMethod targetMethod = sootConfig.getTargetMethod();
 
         Body body = targetMethod.retrieveActiveBody();
 
-        Local targetLocal = findLocalVariable(body, "compiled");
-
-        // Local targetLocal = findLocalVariable(body, "aliasOfA");
+        /* Load target local variable */
+        Local targetLocal = sootConfig.getTargetVariable(body);
 
         for (Unit unit : body.getUnits()) {
             if (unit instanceof Stmt) {
@@ -120,25 +106,6 @@ public class DataDependenceAnalysis {
         Set<Local> aliases = findInterProceduralAliases(targetMethod, targetLocal, pta, cg);
         System.out.println("Inter-procedural aliases: " + aliases);
 
-    }
-
-    public static SootMethod findMethodBySignature(SootClass sootClass, String methodSignature) {
-        // Find the method in the class
-        for (SootMethod method : sootClass.getMethods()) {
-            if (method.getSubSignature().equals(methodSignature)) {
-                return method;
-            }
-        }
-        return null; // Return null if the method is not found
-    }
-
-    public static Local findLocalVariable(Body body, String sourceVariableName) {
-        for (Local local : body.getLocals()) {
-            if (local.getName().equals(sourceVariableName)) {
-                return local;
-            }
-        }
-        return null;
     }
 
     public static boolean aliases(Local targetLocal, Local usedLocal, PointsToAnalysis pointsToAnalysis) {
